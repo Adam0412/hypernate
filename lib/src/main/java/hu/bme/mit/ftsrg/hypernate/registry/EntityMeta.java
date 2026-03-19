@@ -4,4 +4,16 @@ public class EntityMeta {
     private String entityClassname;
     private PrimaryKeyDescriptor pkDescriptor;
 
+    public EntityMeta(String entityClassName, PrimaryKeyDescriptor descriptor) {
+        this.entityClassname = entityClassName;
+        this.pkDescriptor = descriptor;
+    }
+
+    public String getClassName() {
+        return entityClassname;
+    }
+
+    public PrimaryKeyDescriptor getPryPrimaryKeyDescriptor() {
+        return pkDescriptor;
+    }
 }
