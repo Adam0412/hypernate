@@ -16,4 +16,8 @@ public class EntityMeta {
     public PrimaryKeyDescriptor getPryPrimaryKeyDescriptor() {
         return pkDescriptor;
     }
+
+    public void setPrimaryKeyDescriptor(PrimaryKeyDescriptor pkDescriptor) {
+        this.pkDescriptor = pkDescriptor;
+    }
 }

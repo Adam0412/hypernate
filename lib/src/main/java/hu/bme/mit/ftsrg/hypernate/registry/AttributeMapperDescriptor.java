@@ -16,4 +16,8 @@ public class AttributeMapperDescriptor {
     public String getMapperName() {
         return mapperClassName;
     }
+
+    public void setAttributeDescriptor(AttributeDescriptor forAttr) {
+        this.forAttr = forAttr;
+    }
 }

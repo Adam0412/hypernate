@@ -22,4 +22,12 @@ public class AttributeDescriptor {
     public AttributeMapperDescriptor getAttributeMapperDescriptor() {
         return mapper;
     }
+
+    public void setPrimarikeyDescriptor(PrimaryKeyDescriptor pk) {
+        this.pk = pk;
+    }
+
+    public void setAttributeMapperDescriptor(AttributeMapperDescriptor mapper) {
+        this.mapper = mapper;
+    }
 }
