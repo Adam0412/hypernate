@@ -1,5 +1,6 @@
 package hu.bme.mit.ftsrg.hypernate.registry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PrimaryKeyDescriptor {
@@ -8,7 +9,7 @@ public class PrimaryKeyDescriptor {
 
     public PrimaryKeyDescriptor(EntityMeta entity) {
         forEntity = entity;
-        descriptor = null;
+        descriptor = new ArrayList<>();
     }
 
     public void add(AttributeDescriptor desc) {
