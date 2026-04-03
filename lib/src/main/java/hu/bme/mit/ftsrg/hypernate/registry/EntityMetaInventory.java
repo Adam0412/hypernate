@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 
 import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyClass;
+import hu.bme.mit.ftsrg.hypernate.annotations.Mapperinfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
+import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
@@ -86,8 +88,14 @@ public class EntityMetaInventory {
         for (Field field : fields) {
             String name = field.getName();
             AttributeDescriptor attributeDescriptor = new AttributeDescriptor(pKeyDescriptor, name, null);
+            if (field.isAnnotationPresent(Mapperinfo.class)) {
+                Mapperinfo mapperinfo = field.getAnnotation(Mapperinfo.class);
+                String mapperName = mapperinfo.value().getName();
+                AttributeMapperDescriptor mapperDescriptor = new AttributeMapperDescriptor(attributeDescriptor,
+                        mapperName);
+                attributeDescriptor.setAttributeMapperDescriptor(mapperDescriptor);
+            }
             pKeyDescriptor.add(attributeDescriptor);
-            // There is no option for mapper at the moment
         }
         meta.setPrimaryKeyDescriptor(pKeyDescriptor);
         this.add(meta);
