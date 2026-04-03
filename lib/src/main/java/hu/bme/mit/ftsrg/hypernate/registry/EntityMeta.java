@@ -13,7 +13,7 @@ public class EntityMeta {
         return entityClassname;
     }
 
-    public PrimaryKeyDescriptor getPryPrimaryKeyDescriptor() {
+    public PrimaryKeyDescriptor getPrimaryKeyDescriptor() {
         return pkDescriptor;
     }
 

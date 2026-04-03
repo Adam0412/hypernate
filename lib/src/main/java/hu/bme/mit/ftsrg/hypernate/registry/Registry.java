@@ -2,6 +2,9 @@
 package hu.bme.mit.ftsrg.hypernate.registry;
 
 import com.jcabi.aspects.Loggable;
+
+import hu.bme.mit.ftsrg.hypernate.annotations.EntityKeyProvider;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -227,7 +230,7 @@ public class Registry {
   }
 
   private <T> String getCompositeKey(final T ent) {
-    return stub.createCompositeKey(entityProvider.getType(ent), entityProvider.getPrimaryKeys(ent))
-        .toString();
+    EntityKeyProvider keyProvider = entityProvider.getKeyProviderForClass(ent.getClass());
+    return keyProvider.getKey(ent);
   }
 }

@@ -3,6 +3,8 @@ package hu.bme.mit.ftsrg.hypernate.registry;
 import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
+import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
+import hu.bme.mit.ftsrg.hypernate.annotations.EntityKeyProvider;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -11,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+
+import org.hyperledger.fabric.shim.ledger.CompositeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,5 +146,50 @@ public class EntityMetaProvider {
     }
 
     return value;
+  }
+
+  public EntityKeyProvider getKeyProviderForClass(Class<?> clazz) {
+    EntityMeta em = metaInventory.getForClass(clazz);
+    EntityKeyProvider lambda = (Object entity) -> {
+      List<String> keyParts = new ArrayList<>();
+      PrimaryKeyDescriptor pk = em.getPrimaryKeyDescriptor();
+      List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptiors();
+      for (AttributeDescriptor descriptor : pkAttributeDescriptors) {
+        try {
+          Field field = entity.getClass().getField(descriptor.getAttrFieldName());
+          String mappername = descriptor.getAttributeMapperDescriptor().getMapperName();
+          Class<?> mapperClass = Class.forName(mappername);
+          Constructor<?> mapperConstructor;
+          try {
+            mapperConstructor = mapperClass.getDeclaredConstructor();
+          } catch (NoSuchMethodException e) {
+            logger.error("Could not find no-arg constructor for mapper {}", mapperClass.getName());
+            throw new RuntimeException(e);
+          }
+          AttributeMapper mapper;
+          try {
+            mapper = (AttributeMapper) mapperConstructor.newInstance();
+          } catch (InstantiationException e) {
+            logger.error("Failed to instantiate mapper {}", mapperClass.getName());
+            throw new RuntimeException(e);
+          } catch (IllegalAccessException e) {
+            logger.error("Could not access constructor for mapper {}", mapperClass.getName());
+            throw new RuntimeException(e);
+          } catch (InvocationTargetException e) {
+            logger.error(
+                "An exception was thrown by the constructor of mapper {}", mapperClass.getName());
+            throw new RuntimeException(e);
+          }
+          field.setAccessible(true);
+          String value = field.get(entity).toString();
+          String mappedvalue = mapper.apply(value);
+          keyParts.add(mappedvalue);
+        } catch (Exception e) {
+          throw new RuntimeException("Something went wrong, while trying accessing the values of the entity:", e);
+        }
+      }
+      return new CompositeKey(clazz.getSimpleName(), keyParts).toString();
+    };
+    return lambda;
   }
 }

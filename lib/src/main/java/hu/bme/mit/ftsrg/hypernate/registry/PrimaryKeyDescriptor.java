@@ -19,4 +19,8 @@ public class PrimaryKeyDescriptor {
     public EntityMeta getEntityMeta() {
         return forEntity;
     }
+
+    public List<AttributeDescriptor> getAttributeDescriptiors() {
+        return descriptor;
+    }
 }

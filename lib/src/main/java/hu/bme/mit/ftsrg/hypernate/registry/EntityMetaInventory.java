@@ -28,7 +28,7 @@ public class EntityMetaInventory {
 
     public EntityMeta getForClass(Class<?> clazz) {
         for (EntityMeta em : data) {
-            if (em.getClassName().equals(clazz.getSimpleName())) {
+            if (em.getClassName().equals(clazz.getName())) {
                 return em;
             }
         }
@@ -60,7 +60,7 @@ public class EntityMetaInventory {
 
     public void generateMetadatafromPrimaryKey(ClassInfo info) {
         Class<?> classes = info.loadClass();
-        EntityMeta meta = new EntityMeta(classes.getSimpleName(), null);
+        EntityMeta meta = new EntityMeta(classes.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
         PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
         AttributeInfo[] attrinfos = pk.value();
@@ -80,7 +80,7 @@ public class EntityMetaInventory {
         Class<?> classes = info.loadClass();
         KeyClass key = classes.getAnnotation(KeyClass.class);
         Class<?> pointed = key.value();
-        EntityMeta meta = new EntityMeta(pointed.getSimpleName(), null);
+        EntityMeta meta = new EntityMeta(pointed.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
         Field[] fields = classes.getDeclaredFields();
         for (Field field : fields) {
