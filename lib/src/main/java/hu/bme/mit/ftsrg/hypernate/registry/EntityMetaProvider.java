@@ -192,4 +192,12 @@ public class EntityMetaProvider {
     };
     return lambda;
   }
+
+  public String createCompositeKey(final Class<?> clazz) {
+    return new CompositeKey(getType(clazz)).toString();
+  }
+
+  public String createCompositeKey(Class<?> clazz, Object... keyParts) {
+    return new CompositeKey(getType(clazz), mapKeyPartsToString(clazz, keyParts)).toString();
+  }
 }

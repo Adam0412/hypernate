@@ -149,9 +149,7 @@ public class Registry {
               + clazz.getName());
     }
 
-    final String key = stub.createCompositeKey(
-        entityProvider.getType(clazz), entityProvider.mapKeyPartsToString(clazz, keyParts))
-        .toString();
+    final String key = entityProvider.createCompositeKey(clazz, keyParts);
     final byte[] data = stub.getState(key);
 
     if (data == null || data.length == 0) {
@@ -187,7 +185,7 @@ public class Registry {
    * @param <T> the entity type
    */
   public <T> List<T> readAll(final Class<T> clazz) {
-    final String key = stub.createCompositeKey(entityProvider.getType(clazz)).toString();
+    final String key = entityProvider.createCompositeKey(clazz);
     Iterator<KeyValue> iterator = stub.getStateByPartialCompositeKey(key).iterator();
     Iterable<KeyValue> iterable = () -> iterator;
     return StreamSupport.stream(iterable.spliterator(), false)
