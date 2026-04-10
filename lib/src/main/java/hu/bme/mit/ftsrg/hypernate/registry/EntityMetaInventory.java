@@ -61,9 +61,12 @@ public class EntityMetaInventory {
 
     public void generateMetadatafromPrimaryKey(ClassInfo info) {
         Class<?> classes = info.loadClass();
+        PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
+        if (pk == null) {
+            return;
+        }
         EntityMeta meta = new EntityMeta(classes.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
-        PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
         AttributeInfo[] attrinfos = pk.value();
         for (AttributeInfo attrinfo : attrinfos) {
             String name = attrinfo.name();
@@ -80,6 +83,9 @@ public class EntityMetaInventory {
     public void generateMetadatafromKeyClass(ClassInfo info) {
         Class<?> classes = info.loadClass();
         KeyClass key = classes.getAnnotation(KeyClass.class);
+        if (key == null) {
+            return;
+        }
         Class<?> pointed = key.value();
         EntityMeta meta = new EntityMeta(pointed.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
@@ -89,10 +95,13 @@ public class EntityMetaInventory {
             AttributeDescriptor attributeDescriptor = new AttributeDescriptor(pKeyDescriptor, name, null);
             if (field.isAnnotationPresent(Mapperinfo.class)) {
                 Mapperinfo mapperinfo = field.getAnnotation(Mapperinfo.class);
-                String mapperName = mapperinfo.value().getName();
-                AttributeMapperDescriptor mapperDescriptor = new AttributeMapperDescriptor(attributeDescriptor,
-                        mapperName);
-                attributeDescriptor.setAttributeMapperDescriptor(mapperDescriptor);
+                if (mapperinfo != null) {
+                    String mapperName = mapperinfo.value().getName();
+                    AttributeMapperDescriptor mapperDescriptor = new AttributeMapperDescriptor(attributeDescriptor,
+                            mapperName);
+                    attributeDescriptor.setAttributeMapperDescriptor(mapperDescriptor);
+                }
+
             }
             pKeyDescriptor.add(attributeDescriptor);
         }
