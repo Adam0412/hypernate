@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 
 import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyClass;
-import hu.bme.mit.ftsrg.hypernate.annotations.Mapperinfo;
+import hu.bme.mit.ftsrg.hypernate.annotations.MapperInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
@@ -16,14 +16,13 @@ import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
 public class EntityMetaInventory {
-    private Set<EntityMeta> data;
+    private static Set<EntityMeta> data;
     private static final Logger logger = LoggerFactory.getLogger(EntityMetaInventory.class);
 
     public EntityMetaInventory() {
-        initialize();
     }
 
-    public void add(EntityMeta meta) {
+    public static void add(EntityMeta meta) {
         data.add(meta);
     }
 
@@ -36,7 +35,7 @@ public class EntityMetaInventory {
         return null;
     }
 
-    public void initialize() {
+    static {
         try (ScanResult result = new ClassGraph().enableClassInfo().enableAnnotationInfo().scan()) {
             ClassInfoList primaryKeyInfo = result.getClassesWithAnnotation(PrimaryKey.class);
             ClassInfoList keyClassInfo = result.getClassesWithAnnotation(KeyClass.class);
@@ -59,7 +58,7 @@ public class EntityMetaInventory {
         }
     }
 
-    public void generateMetadatafromPrimaryKey(ClassInfo info) {
+    public static void generateMetadatafromPrimaryKey(ClassInfo info) {
         Class<?> classes = info.loadClass();
         PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
         if (pk == null) {
@@ -77,10 +76,10 @@ public class EntityMetaInventory {
             pKeyDescriptor.add(attributeDescriptor);
         }
         meta.setPrimaryKeyDescriptor(pKeyDescriptor);
-        this.add(meta);
+        add(meta);
     }
 
-    public void generateMetadatafromKeyClass(ClassInfo info) {
+    public static void generateMetadatafromKeyClass(ClassInfo info) {
         Class<?> classes = info.loadClass();
         KeyClass key = classes.getAnnotation(KeyClass.class);
         if (key == null) {
@@ -93,8 +92,8 @@ public class EntityMetaInventory {
         for (Field field : fields) {
             String name = field.getName();
             AttributeDescriptor attributeDescriptor = new AttributeDescriptor(pKeyDescriptor, name, null);
-            if (field.isAnnotationPresent(Mapperinfo.class)) {
-                Mapperinfo mapperinfo = field.getAnnotation(Mapperinfo.class);
+            if (field.isAnnotationPresent(MapperInfo.class)) {
+                MapperInfo mapperinfo = field.getAnnotation(MapperInfo.class);
                 if (mapperinfo != null) {
                     String mapperName = mapperinfo.value().getName();
                     AttributeMapperDescriptor mapperDescriptor = new AttributeMapperDescriptor(attributeDescriptor,
@@ -106,7 +105,7 @@ public class EntityMetaInventory {
             pKeyDescriptor.add(attributeDescriptor);
         }
         meta.setPrimaryKeyDescriptor(pKeyDescriptor);
-        this.add(meta);
+        add(meta);
     }
 
 }
