@@ -9,6 +9,6 @@ import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Mapperinfo {
+public @interface MapperInfo {
     Class<? extends AttributeMapper> value();
 }
