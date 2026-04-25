@@ -36,6 +36,15 @@ public class EntityMetaInventory {
         return null;
     }
 
+    /**
+     * Initializes the metadata registry by scanning the classpath for annotated
+     * classes.
+     * Searches for classes marked with {@link PrimaryKey} or {@link KeyClass}
+     * annotations.
+     * For each discovered class, it generates the corresponding {@link EntityMeta}
+     * and stores it in the internal metadata inventory.
+     * 
+     */
     static {
         try (ScanResult result = new ClassGraph().enableClassInfo().enableExternalClasses().ignoreClassVisibility()
                 .enableAnnotationInfo().scan()) {
@@ -60,6 +69,16 @@ public class EntityMetaInventory {
         }
     }
 
+    /**
+     * Generates and registers metadata for a class annotated with
+     * {@link PrimaryKey}.
+     * 
+     * This method extracts attribute and mapper information directly from the
+     * {@code @PrimaryKey} annotation's value array.
+     * 
+     * @param info the {@link ClassInfo} of the annotated class
+     */
+
     public static void generateMetadataFromPrimaryKey(ClassInfo info) {
         Class<?> classes = info.loadClass();
         PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
@@ -80,6 +99,18 @@ public class EntityMetaInventory {
         meta.setPrimaryKeyDescriptor(pKeyDescriptor);
         add(meta);
     }
+
+    /**
+     * Generates and registers metadata based on a {@link KeyClass} annotation.
+     * 
+     * Unlike {@code PrimaryKey}, this method treats the annotated class as a
+     * template
+     * for a target entity. It uses reflection to scan the fields of the annotated
+     * class to build the primary key descriptor for the referenced entity class.
+     * 
+     * @param info the {@link ClassInfo} of the class containing the
+     *             {@code @KeyClass} annotation
+     */
 
     public static void generateMetadataFromKeyClass(ClassInfo info) {
         Class<?> classes = info.loadClass();
