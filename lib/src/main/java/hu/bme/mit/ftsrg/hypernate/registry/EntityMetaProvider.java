@@ -148,6 +148,18 @@ public class EntityMetaProvider {
     return value;
   }
 
+  /**
+   * Generates a lambda which builds a CompositeKey for a given class instance
+   * 
+   * Using reflection we access the Field values which are given as primary keys,
+   * and
+   * with our mappers instances we map the values and with these we build the
+   * Composite Key.
+   * 
+   * @param clazz the class of the entity
+   * @return a lambda that creates a CompositeKey for an object instance
+   * 
+   */
   public EntityKeyProvider getKeyProviderForClass(Class<?> clazz) {
     try {
       EntityMeta em = metaInventory.getForClass(clazz);
