@@ -1,6 +1,7 @@
 package hu.bme.mit.ftsrg.hypernate.registry;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
 public class EntityMetaInventory {
-    private static Set<EntityMeta> data;
+    private static Set<EntityMeta> data = new HashSet<>();
     private static final Logger logger = LoggerFactory.getLogger(EntityMetaInventory.class);
 
     public EntityMetaInventory() {
@@ -36,21 +37,22 @@ public class EntityMetaInventory {
     }
 
     static {
-        try (ScanResult result = new ClassGraph().enableClassInfo().enableAnnotationInfo().scan()) {
+        try (ScanResult result = new ClassGraph().enableClassInfo().enableExternalClasses().ignoreClassVisibility()
+                .enableAnnotationInfo().scan()) {
             ClassInfoList primaryKeyInfo = result.getClassesWithAnnotation(PrimaryKey.class);
             ClassInfoList keyClassInfo = result.getClassesWithAnnotation(KeyClass.class);
             if (primaryKeyInfo.isEmpty()) {
                 logger.info("There are no classes with PrimaryKey annotation.");
             } else {
                 primaryKeyInfo.forEach(info -> {
-                    generateMetadatafromPrimaryKey(info);
+                    generateMetadataFromPrimaryKey(info);
                 });
             }
             if (keyClassInfo.isEmpty()) {
                 logger.info("There are no classes with KeyClass annotation.");
             } else {
                 keyClassInfo.forEach(info -> {
-                    generateMetadatafromKeyClass(info);
+                    generateMetadataFromKeyClass(info);
                 });
             }
         } catch (Exception e) {
@@ -58,7 +60,7 @@ public class EntityMetaInventory {
         }
     }
 
-    public static void generateMetadatafromPrimaryKey(ClassInfo info) {
+    public static void generateMetadataFromPrimaryKey(ClassInfo info) {
         Class<?> classes = info.loadClass();
         PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
         if (pk == null) {
@@ -79,7 +81,7 @@ public class EntityMetaInventory {
         add(meta);
     }
 
-    public static void generateMetadatafromKeyClass(ClassInfo info) {
+    public static void generateMetadataFromKeyClass(ClassInfo info) {
         Class<?> classes = info.loadClass();
         KeyClass key = classes.getAnnotation(KeyClass.class);
         if (key == null) {
