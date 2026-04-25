@@ -149,14 +149,26 @@ public class EntityMetaProvider {
   }
 
   public EntityKeyProvider getKeyProviderForClass(Class<?> clazz) {
-    EntityMeta em = metaInventory.getForClass(clazz);
-    EntityKeyProvider lambda = (Object entity) -> {
-      List<String> keyParts = new ArrayList<>();
+    try {
+      EntityMeta em = metaInventory.getForClass(clazz);
+
+      List<Field> fields = new ArrayList<>();
+      List<AttributeMapper> mappers = new ArrayList<>();
       PrimaryKeyDescriptor pk = em.getPrimaryKeyDescriptor();
       List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptiors();
       for (AttributeDescriptor descriptor : pkAttributeDescriptors) {
         try {
-          Field field = entity.getClass().getField(descriptor.getAttrFieldName());
+          Field field = clazz.getDeclaredField(descriptor.getAttrFieldName());
+          field.setAccessible(true);
+          fields.add(field);
+        } catch (Exception e) {
+          throw new RuntimeException("Error accessing fields for class: " + clazz.getName(), e);
+        }
+        try {
+          if (descriptor.getAttributeMapperDescriptor() == null) {
+            mappers.add(null);
+            continue;
+          }
           String mappername = descriptor.getAttributeMapperDescriptor().getMapperName();
           Class<?> mapperClass = Class.forName(mappername);
           Constructor<?> mapperConstructor;
@@ -169,6 +181,7 @@ public class EntityMetaProvider {
           AttributeMapper mapper;
           try {
             mapper = (AttributeMapper) mapperConstructor.newInstance();
+            mappers.add(mapper);
           } catch (InstantiationException e) {
             logger.error("Failed to instantiate mapper {}", mapperClass.getName());
             throw new RuntimeException(e);
@@ -180,17 +193,30 @@ public class EntityMetaProvider {
                 "An exception was thrown by the constructor of mapper {}", mapperClass.getName());
             throw new RuntimeException(e);
           }
-          field.setAccessible(true);
-          String value = field.get(entity).toString();
-          String mappedvalue = mapper.apply(value);
-          keyParts.add(mappedvalue);
         } catch (Exception e) {
-          throw new RuntimeException("Something went wrong, while trying accessing the values of the entity:", e);
+          throw new RuntimeException("Something went wrong, while accessing the mappers:", e);
         }
       }
-      return new CompositeKey(clazz.getSimpleName(), keyParts).toString();
-    };
-    return lambda;
+
+      return (Object entity) -> {
+        List<String> keyParts = new ArrayList<>();
+        for (int i = 0; i < fields.size(); i++) {
+          try {
+            String value = fields.get(i).get(entity).toString();
+            if (mappers.get(i) != null) {
+              keyParts.add(mappers.get(i).apply(value));
+            } else {
+              keyParts.add(value);
+            }
+          } catch (IllegalAccessException e) {
+            throw new RuntimeException("Could not access field value on entity", e);
+          }
+        }
+        return new CompositeKey(clazz.getName(), keyParts).toString();
+      };
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to provide EntityKeyProvider for class: " + clazz.getName(), e);
+    }
   }
 
   public String createCompositeKey(final Class<?> clazz) {
