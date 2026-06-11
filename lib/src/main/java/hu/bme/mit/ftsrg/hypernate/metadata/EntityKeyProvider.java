@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate.annotations;
+package hu.bme.mit.ftsrg.hypernate.metadata;
 
 @FunctionalInterface
 public interface EntityKeyProvider {

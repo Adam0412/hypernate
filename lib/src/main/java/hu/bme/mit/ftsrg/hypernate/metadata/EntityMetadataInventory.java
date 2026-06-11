@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate.registry;
+package hu.bme.mit.ftsrg.hypernate.metadata;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;

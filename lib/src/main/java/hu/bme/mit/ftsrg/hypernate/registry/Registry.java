@@ -3,7 +3,9 @@ package hu.bme.mit.ftsrg.hypernate.registry;
 
 import com.jcabi.aspects.Loggable;
 
-import hu.bme.mit.ftsrg.hypernate.annotations.EntityKeyProvider;
+import hu.bme.mit.ftsrg.hypernate.metadata.EntityKeyProvider;
+import hu.bme.mit.ftsrg.hypernate.metadata.EntityMeta;
+import hu.bme.mit.ftsrg.hypernate.metadata.EntityMetadataProvider;
 
 import java.util.*;
 import java.util.stream.Collectors;

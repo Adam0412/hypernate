@@ -1,8 +1,8 @@
-package hu.bme.mit.ftsrg.hypernate.registry;
+package hu.bme.mit.ftsrg.hypernate.metadata;
 
 import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
-import hu.bme.mit.ftsrg.hypernate.annotations.EntityKeyProvider;
+import hu.bme.mit.ftsrg.hypernate.registry.MissingKeysException;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -99,11 +99,11 @@ public class EntityMetadataProvider {
     return stringKeyParts.toArray(String[]::new);
   }
 
-  <T> byte[] toBuffer(final T entity) {
+  public <T> byte[] toBuffer(final T entity) {
     return toJson(entity).getBytes(StandardCharsets.UTF_8);
   }
 
-  <T> T fromBuffer(final byte[] buffer, final Class<T> clazz) {
+  public <T> T fromBuffer(final byte[] buffer, final Class<T> clazz) {
     final String json = new String(buffer, StandardCharsets.UTF_8);
     logger.debug("Parsing entity from JSON: {}", json);
     return JSON.deserialize(json, clazz);

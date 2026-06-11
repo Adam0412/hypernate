@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate.registry;
+package hu.bme.mit.ftsrg.hypernate.metadata;
 
 public class EntityMeta {
     private String entityClassname;
