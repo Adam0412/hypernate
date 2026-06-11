@@ -1,7 +1,6 @@
 package hu.bme.mit.ftsrg.hypernate.registry;
 
 import com.jcabi.aspects.Loggable;
-import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
 import hu.bme.mit.ftsrg.hypernate.annotations.EntityKeyProvider;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
@@ -17,12 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Loggable(Loggable.DEBUG)
-public class EntityMetaDataProvider {
-  private static final Logger logger = LoggerFactory.getLogger(EntityMetaDataProvider.class);
-  private EntityMetaDataInventory metaInventory = new EntityMetaDataInventory();
+public class EntityMetadataProvider {
+  private static final Logger logger = LoggerFactory.getLogger(EntityMetadataProvider.class);
+  private EntityMetadataInventory metaInventory = new EntityMetadataInventory();
   private Map<Class<?>, EntityKeyProvider> keyProviders = new HashMap<>();
 
-  public EntityMetaDataProvider() {
+  public EntityMetadataProvider() {
 
   }
 
@@ -213,7 +212,7 @@ public class EntityMetaDataProvider {
     return new CompositeKey(getType(clazz), mapKeyPartsToString(clazz, keyParts)).toString();
   }
 
-  public EntityMetaDataInventory getMetaDataInventory() {
+  public EntityMetadataInventory getMetaDataInventory() {
     return metaInventory;
   }
 }

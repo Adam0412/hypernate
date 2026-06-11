@@ -13,18 +13,18 @@ import org.slf4j.Logger;
 import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyClass;
 import hu.bme.mit.ftsrg.hypernate.annotations.MapperInfo;
-import hu.bme.mit.ftsrg.hypernate.annotations.Order;
+import hu.bme.mit.ftsrg.hypernate.annotations.KeyOrder;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
-public class EntityMetaDataInventory {
+public class EntityMetadataInventory {
     private static Set<EntityMeta> data = new HashSet<>();
-    private static final Logger logger = LoggerFactory.getLogger(EntityMetaDataInventory.class);
+    private static final Logger logger = LoggerFactory.getLogger(EntityMetadataInventory.class);
 
-    public EntityMetaDataInventory() {
+    public EntityMetadataInventory() {
     }
 
     public static void add(EntityMeta meta) {
@@ -127,12 +127,12 @@ public class EntityMetaDataInventory {
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
         Field[] fields = classes.getDeclaredFields();
         for (Field field : fields) {
-            if (!field.isAnnotationPresent(Order.class)) {
+            if (!field.isAnnotationPresent(KeyOrder.class)) {
                 throw new ChaincodeException(
                         "There is at least one Field without order in the class annotated with KeyClass");
             }
         }
-        Arrays.sort(fields, Comparator.comparingInt(f -> f.getAnnotation(Order.class).value()));
+        Arrays.sort(fields, Comparator.comparingInt(f -> f.getAnnotation(KeyOrder.class).value()));
         for (Field field : fields) {
             String name = field.getName();
             AttributeDescriptor attributeDescriptor = new AttributeDescriptor(pKeyDescriptor, name, null);
