@@ -24,10 +24,7 @@ public class EntityMetadataInventory {
     private static Set<EntityMeta> data = new HashSet<>();
     private static final Logger logger = LoggerFactory.getLogger(EntityMetadataInventory.class);
 
-    public EntityMetadataInventory() {
-    }
-
-    public static void add(EntityMeta meta) {
+    private static void add(EntityMeta meta) {
         data.add(meta);
     }
 
@@ -83,13 +80,13 @@ public class EntityMetadataInventory {
      * @param info the {@link ClassInfo} of the annotated class
      */
 
-    public static void generateMetadataFromPrimaryKey(ClassInfo info) {
-        Class<?> classes = info.loadClass();
-        PrimaryKey pk = classes.getAnnotation(PrimaryKey.class);
+    private static void generateMetadataFromPrimaryKey(ClassInfo info) {
+        Class<?> clazz = info.loadClass();
+        PrimaryKey pk = clazz.getAnnotation(PrimaryKey.class);
         if (pk == null) {
             return;
         }
-        EntityMeta meta = new EntityMeta(classes.getName(), null);
+        EntityMeta meta = new EntityMeta(clazz.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
         AttributeInfo[] attrinfos = pk.value();
         for (AttributeInfo attrinfo : attrinfos) {
@@ -116,16 +113,16 @@ public class EntityMetadataInventory {
      *             {@code @KeyClass} annotation
      */
 
-    public static void generateMetadataFromKeyClass(ClassInfo info) {
-        Class<?> classes = info.loadClass();
-        KeyClass key = classes.getAnnotation(KeyClass.class);
+    private static void generateMetadataFromKeyClass(ClassInfo info) {
+        Class<?> clazz = info.loadClass();
+        KeyClass key = clazz.getAnnotation(KeyClass.class);
         if (key == null) {
             return;
         }
         Class<?> pointed = key.value();
         EntityMeta meta = new EntityMeta(pointed.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
-        Field[] fields = classes.getDeclaredFields();
+        Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (!field.isAnnotationPresent(KeyOrder.class)) {
                 throw new ChaincodeException(
