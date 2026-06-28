@@ -2,6 +2,7 @@ package hu.bme.mit.ftsrg.hypernate.metadata;
 
 import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
+import hu.bme.mit.ftsrg.hypernate.registry.MissingEntityMetadataException;
 import hu.bme.mit.ftsrg.hypernate.registry.MissingKeysException;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Constructor;
@@ -36,7 +37,7 @@ public class EntityMetadataProvider {
   <T> String[] mapKeyPartsToString(final Class<T> clazz, final Object... keyParts) {
     EntityMeta em = metaInventory.getForClass(clazz);
     if (em == null) {
-      throw new ChaincodeException("Could not find key generation method.");
+      throw new MissingEntityMetadataException("Could not find key generation method.");
     }
     List<Field> fields = new ArrayList<>();
     List<AttributeMapper> mappers = new ArrayList<>();
