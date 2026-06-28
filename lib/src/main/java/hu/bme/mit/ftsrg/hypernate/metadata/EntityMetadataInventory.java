@@ -15,6 +15,7 @@ import hu.bme.mit.ftsrg.hypernate.annotations.KeyClass;
 import hu.bme.mit.ftsrg.hypernate.annotations.MapperInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyOrder;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
+import hu.bme.mit.ftsrg.hypernate.registry.MissingOrderException;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
@@ -125,7 +126,7 @@ public class EntityMetadataInventory {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (!field.isAnnotationPresent(KeyOrder.class)) {
-                throw new ChaincodeException(
+                throw new MissingOrderException(
                         "There is at least one Field without order in the class annotated with KeyClass");
             }
         }
