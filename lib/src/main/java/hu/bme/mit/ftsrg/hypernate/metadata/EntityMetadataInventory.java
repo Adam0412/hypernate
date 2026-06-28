@@ -84,7 +84,7 @@ public class EntityMetadataInventory {
         Class<?> clazz = info.loadClass();
         PrimaryKey pk = clazz.getAnnotation(PrimaryKey.class);
         if (pk == null) {
-            return;
+            throw new IllegalStateException("Missing @PrimaryKey runtime annotation on class " + clazz.getName());
         }
         EntityMeta meta = new EntityMeta(clazz.getName(), null);
         PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
@@ -117,7 +117,7 @@ public class EntityMetadataInventory {
         Class<?> clazz = info.loadClass();
         KeyClass key = clazz.getAnnotation(KeyClass.class);
         if (key == null) {
-            return;
+            throw new IllegalStateException("Missing @PrimaryKey runtime annotation on class " + clazz.getName());
         }
         Class<?> pointed = key.value();
         EntityMeta meta = new EntityMeta(pointed.getName(), null);
