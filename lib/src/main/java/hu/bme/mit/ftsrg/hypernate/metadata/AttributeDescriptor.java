@@ -1,33 +1,35 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
 public class AttributeDescriptor {
-    private PrimaryKeyDescriptor pk;
-    private String attrFieldName;
-    private AttributeMapperDescriptor mapper;
+  private PrimaryKeyDescriptor pk;
+  private String attrFieldName;
+  private AttributeMapperDescriptor mapper;
 
-    public AttributeDescriptor(PrimaryKeyDescriptor pk, String attrFieldName, AttributeMapperDescriptor mapper) {
-        this.pk = pk;
-        this.attrFieldName = attrFieldName;
-        this.mapper = mapper;
-    }
+  public AttributeDescriptor(
+      PrimaryKeyDescriptor pk, String attrFieldName, AttributeMapperDescriptor mapper) {
+    this.pk = pk;
+    this.attrFieldName = attrFieldName;
+    this.mapper = mapper;
+  }
 
-    public PrimaryKeyDescriptor getPrimaryKeyDescriptor() {
-        return pk;
-    }
+  public PrimaryKeyDescriptor getPrimaryKeyDescriptor() {
+    return pk;
+  }
 
-    public String getAttrFieldName() {
-        return attrFieldName;
-    }
+  public String getAttrFieldName() {
+    return attrFieldName;
+  }
 
-    public AttributeMapperDescriptor getAttributeMapperDescriptor() {
-        return mapper;
-    }
+  public AttributeMapperDescriptor getAttributeMapperDescriptor() {
+    return mapper;
+  }
 
-    public void setPrimarikeyDescriptor(PrimaryKeyDescriptor pk) {
-        this.pk = pk;
-    }
+  public void setPrimarikeyDescriptor(PrimaryKeyDescriptor pk) {
+    this.pk = pk;
+  }
 
-    public void setAttributeMapperDescriptor(AttributeMapperDescriptor mapper) {
-        this.mapper = mapper;
-    }
+  public void setAttributeMapperDescriptor(AttributeMapperDescriptor mapper) {
+    this.mapper = mapper;
+  }
 }

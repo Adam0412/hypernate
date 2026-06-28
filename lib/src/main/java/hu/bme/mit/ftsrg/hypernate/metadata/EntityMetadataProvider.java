@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
 import com.jcabi.aspects.Loggable;
@@ -10,8 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-
-import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ledger.CompositeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,15 +119,12 @@ public class EntityMetadataProvider {
 
   /**
    * Generates a lambda which builds a CompositeKey for a given class instance
-   * 
-   * Using reflection we access the Field values which are given as primary keys,
-   * and
-   * with our mappers instances we map the values and with these we build the
-   * Composite Key.
-   * 
+   *
+   * <p>Using reflection we access the Field values which are given as primary keys, and with our
+   * mappers instances we map the values and with these we build the Composite Key.
+   *
    * @param clazz the class of the entity
    * @return a lambda that creates a CompositeKey for an object instance
-   * 
    */
   private EntityKeyProvider createEntityKeyProvider(Class<?> clazz) {
     try {
@@ -197,7 +193,8 @@ public class EntityMetadataProvider {
         return new CompositeKey(clazz.getName(), keyParts).toString();
       };
     } catch (Exception e) {
-      throw new MissingKeysException("Failed to provide EntityKeyProvider for class: " + clazz.getName(), e);
+      throw new MissingKeysException(
+          "Failed to provide EntityKeyProvider for class: " + clazz.getName(), e);
     }
   }
 

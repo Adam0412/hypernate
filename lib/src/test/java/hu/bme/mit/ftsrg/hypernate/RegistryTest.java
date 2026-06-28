@@ -41,8 +41,8 @@ class RegistryTest {
 
   private static final TestEntity entity = new TestEntity("fooValue", 110);
 
-  private static final CompositeKey ENTITY_COMPOSITE_KEY = new CompositeKey(entity.getClass().getName(), entity.foo,
-      entity.bar.toString());
+  private static final CompositeKey ENTITY_COMPOSITE_KEY =
+      new CompositeKey(entity.getClass().getName(), entity.foo, entity.bar.toString());
   private static final String ENTITY_COMPOSITE_KEY_STR = ENTITY_COMPOSITE_KEY.toString();
   private static final byte[] ENTITY_BUFFER;
 
@@ -54,8 +54,7 @@ class RegistryTest {
     }
   }
 
-  @Mock
-  private ChaincodeStub stub;
+  @Mock private ChaincodeStub stub;
 
   private Registry registry;
 
@@ -66,8 +65,7 @@ class RegistryTest {
 
   @Test
   void given_entity_without_primary_keys_when_doing_anything_then_throws_exception() {
-    record KeylessTestEntity(String foo, Integer bar) {
-    }
+    record KeylessTestEntity(String foo, Integer bar) {}
     final KeylessTestEntity keylessEntity = new KeylessTestEntity("fooValue", 110);
 
     assertThrows(MissingKeysException.class, () -> registry.mustCreate(keylessEntity));
@@ -86,11 +84,10 @@ class RegistryTest {
 
   @FieldNameConstants
   @PrimaryKey({
-      @AttributeInfo(name = TestEntity.Fields.foo),
-      @AttributeInfo(name = TestEntity.Fields.bar)
+    @AttributeInfo(name = TestEntity.Fields.foo),
+    @AttributeInfo(name = TestEntity.Fields.bar)
   })
-  private record TestEntity(String foo, Integer bar) {
-  }
+  private record TestEntity(String foo, Integer bar) {}
 
   @Nested
   class when_must_create {
@@ -244,8 +241,7 @@ class RegistryTest {
           .willReturn(
               new QueryResultsIterator<>() {
                 @Override
-                public void close() {
-                }
+                public void close() {}
 
                 @Override
                 public @Nonnull Iterator<KeyValue> iterator() {
@@ -278,8 +274,7 @@ class RegistryTest {
                 private boolean done = false;
 
                 @Override
-                public void close() {
-                }
+                public void close() {}
 
                 @Override
                 public @Nonnull Iterator<KeyValue> iterator() {

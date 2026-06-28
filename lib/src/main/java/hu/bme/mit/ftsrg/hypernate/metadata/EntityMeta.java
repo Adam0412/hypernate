@@ -1,23 +1,24 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
 public class EntityMeta {
-    private String entityClassname;
-    private PrimaryKeyDescriptor pkDescriptor;
+  private String entityClassname;
+  private PrimaryKeyDescriptor pkDescriptor;
 
-    public EntityMeta(String entityClassName, PrimaryKeyDescriptor descriptor) {
-        this.entityClassname = entityClassName;
-        this.pkDescriptor = descriptor;
-    }
+  public EntityMeta(String entityClassName, PrimaryKeyDescriptor descriptor) {
+    this.entityClassname = entityClassName;
+    this.pkDescriptor = descriptor;
+  }
 
-    public String getClassName() {
-        return entityClassname;
-    }
+  public String getClassName() {
+    return entityClassname;
+  }
 
-    public PrimaryKeyDescriptor getPrimaryKeyDescriptor() {
-        return pkDescriptor;
-    }
+  public PrimaryKeyDescriptor getPrimaryKeyDescriptor() {
+    return pkDescriptor;
+  }
 
-    public void setPrimaryKeyDescriptor(PrimaryKeyDescriptor pkDescriptor) {
-        this.pkDescriptor = pkDescriptor;
-    }
+  public void setPrimaryKeyDescriptor(PrimaryKeyDescriptor pkDescriptor) {
+    this.pkDescriptor = pkDescriptor;
+  }
 }
