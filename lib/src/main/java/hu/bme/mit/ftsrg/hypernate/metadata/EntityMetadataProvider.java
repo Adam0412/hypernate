@@ -21,10 +21,6 @@ public class EntityMetadataProvider {
   private EntityMetadataInventory metaInventory = new EntityMetadataInventory();
   private Map<Class<?>, EntityKeyProvider> keyProviders = new HashMap<>();
 
-  public EntityMetadataProvider() {
-
-  }
-
   <T> String getType(final T entity) {
     return getType(entity.getClass());
   }
