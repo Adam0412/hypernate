@@ -14,26 +14,21 @@ import io.github.classgraph.ScanResult;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EntityMetadataInventory {
-  private static Set<EntityMeta> data = new HashSet<>();
+  private static Map<String, EntityMeta> data = new ConcurrentHashMap<>();
   private static final Logger logger = LoggerFactory.getLogger(EntityMetadataInventory.class);
 
   private static void add(EntityMeta meta) {
-    data.add(meta);
+    data.put(meta.getClassName(), meta);
   }
 
   public EntityMeta getForClass(Class<?> clazz) {
-    for (EntityMeta em : data) {
-      if (em.getClassName().equals(clazz.getName())) {
-        return em;
-      }
-    }
-    return null;
+    return data.get(clazz.getName());
   }
 
   /**
