@@ -1,24 +1,15 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@AllArgsConstructor
 public class EntityMeta {
-  private String entityClassname;
-  private PrimaryKeyDescriptor pkDescriptor;
+  private String className;
+  @Setter
+  private PrimaryKeyDescriptor primaryKeyDescriptor;
 
-  public EntityMeta(String entityClassName, PrimaryKeyDescriptor descriptor) {
-    this.entityClassname = entityClassName;
-    this.pkDescriptor = descriptor;
-  }
-
-  public String getClassName() {
-    return entityClassname;
-  }
-
-  public PrimaryKeyDescriptor getPrimaryKeyDescriptor() {
-    return pkDescriptor;
-  }
-
-  public void setPrimaryKeyDescriptor(PrimaryKeyDescriptor pkDescriptor) {
-    this.pkDescriptor = pkDescriptor;
-  }
 }

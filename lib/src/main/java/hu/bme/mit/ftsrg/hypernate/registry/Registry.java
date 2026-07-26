@@ -139,7 +139,7 @@ public class Registry {
   public <T> T mustRead(Class<T> clazz, Object... keyParts) throws EntityNotFoundException {
     entityProvider.getKeyProviderForClass(clazz);
     EntityMeta meta = entityProvider.getMetaDataInventory().getForClass(clazz);
-    int keyCount = meta.getPrimaryKeyDescriptor().getAttributeDescriptiors().size();
+    int keyCount = meta.getPrimaryKeyDescriptor().getAttributeDescriptors().size();
     if (keyParts.length != keyCount) {
       throw new IllegalArgumentException(
           "The number of key parts provided does not match number of primary keys for "

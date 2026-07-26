@@ -1,24 +1,14 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@AllArgsConstructor
 public class AttributeMapperDescriptor {
-  private AttributeDescriptor forAttr;
-  private String mapperClassName;
-
-  public AttributeMapperDescriptor(AttributeDescriptor attrdesc, String mapperName) {
-    this.forAttr = attrdesc;
-    this.mapperClassName = mapperName;
-  }
-
-  public AttributeDescriptor getAttributeDescriptor() {
-    return forAttr;
-  }
-
-  public String getMapperName() {
-    return mapperClassName;
-  }
-
-  public void setAttributeDescriptor(AttributeDescriptor forAttr) {
-    this.forAttr = forAttr;
-  }
+  @Setter
+  private AttributeDescriptor attributeDescriptor;
+  private String mapperName;
 }

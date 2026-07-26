@@ -40,10 +40,10 @@ public class EntityMetadataProvider {
     List<Field> fields = new ArrayList<>();
     List<AttributeMapper> mappers = new ArrayList<>();
     PrimaryKeyDescriptor pk = em.getPrimaryKeyDescriptor();
-    if (pk == null || pk.getAttributeDescriptiors() == null || pk.getAttributeDescriptiors().isEmpty()) {
+    if (pk == null || pk.getAttributeDescriptors() == null || pk.getAttributeDescriptors().isEmpty()) {
       throw new MissingKeysException("No primary key descriptors found for class: " + clazz.getName());
     }
-    List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptiors();
+    List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptors();
     for (AttributeDescriptor descriptor : pkAttributeDescriptors) {
       try {
         Field field = clazz.getDeclaredField(descriptor.getAttrFieldName());
@@ -122,10 +122,10 @@ public class EntityMetadataProvider {
     List<Field> fields = new ArrayList<>();
     List<AttributeMapper> mappers = new ArrayList<>();
     PrimaryKeyDescriptor pk = em.getPrimaryKeyDescriptor();
-    if (pk == null || pk.getAttributeDescriptiors() == null || pk.getAttributeDescriptiors().isEmpty()) {
+    if (pk == null || pk.getAttributeDescriptors() == null || pk.getAttributeDescriptors().isEmpty()) {
       throw new MissingKeysException("No primary key descriptors found for class: " + clazz.getName());
     }
-    List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptiors();
+    List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptors();
     for (AttributeDescriptor descriptor : pkAttributeDescriptors) {
       try {
         Field field = clazz.getDeclaredField(descriptor.getAttrFieldName());

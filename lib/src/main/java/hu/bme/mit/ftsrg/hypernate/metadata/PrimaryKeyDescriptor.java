@@ -4,24 +4,16 @@ package hu.bme.mit.ftsrg.hypernate.metadata;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrimaryKeyDescriptor {
-  private EntityMeta forEntity;
-  private List<AttributeDescriptor> descriptor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-  public PrimaryKeyDescriptor(EntityMeta entity) {
-    forEntity = entity;
-    descriptor = new ArrayList<>();
-  }
+@Getter
+@RequiredArgsConstructor
+public class PrimaryKeyDescriptor {
+  private final EntityMeta entityMeta;
+  private final List<AttributeDescriptor> attributeDescriptors = new ArrayList<>();
 
   public void add(AttributeDescriptor desc) {
-    descriptor.add(desc);
-  }
-
-  public EntityMeta getEntityMeta() {
-    return forEntity;
-  }
-
-  public List<AttributeDescriptor> getAttributeDescriptiors() {
-    return descriptor;
+    attributeDescriptors.add(desc);
   }
 }
