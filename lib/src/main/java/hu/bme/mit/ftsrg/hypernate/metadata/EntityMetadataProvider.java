@@ -88,7 +88,6 @@ public class EntityMetadataProvider {
 
   public <T> T fromBuffer(final byte[] buffer, final Class<T> clazz) {
     final String json = new String(buffer, StandardCharsets.UTF_8);
-    logger.debug("Parsing entity from JSON: {}", json);
     return JSON.deserialize(json, clazz);
   }
 
