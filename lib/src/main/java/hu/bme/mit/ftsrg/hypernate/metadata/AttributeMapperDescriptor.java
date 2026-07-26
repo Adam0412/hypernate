@@ -8,7 +8,6 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class AttributeMapperDescriptor {
-  @Setter
-  private AttributeDescriptor attributeDescriptor;
+  @Setter private AttributeDescriptor attributeDescriptor;
   private String mapperName;
 }

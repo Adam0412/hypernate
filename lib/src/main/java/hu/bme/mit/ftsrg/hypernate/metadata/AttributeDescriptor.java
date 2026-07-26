@@ -8,9 +8,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class AttributeDescriptor {
-  @Setter
-  private PrimaryKeyDescriptor primaryKeyDescriptor;
+  @Setter private PrimaryKeyDescriptor primaryKeyDescriptor;
   private String attrFieldName;
-  @Setter
-  private AttributeMapperDescriptor attributeMapperDescriptor;
+  @Setter private AttributeMapperDescriptor attributeMapperDescriptor;
 }

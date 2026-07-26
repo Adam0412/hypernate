@@ -9,7 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EntityMeta {
   private String className;
-  @Setter
-  private PrimaryKeyDescriptor primaryKeyDescriptor;
-
+  @Setter private PrimaryKeyDescriptor primaryKeyDescriptor;
 }

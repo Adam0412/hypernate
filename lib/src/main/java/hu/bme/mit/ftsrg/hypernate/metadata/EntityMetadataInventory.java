@@ -119,13 +119,16 @@ public class EntityMetadataInventory {
     EntityMeta meta = new EntityMeta(pointed.getName(), null);
     PrimaryKeyDescriptor pKeyDescriptor = new PrimaryKeyDescriptor(meta);
     Field[] fields = clazz.getDeclaredFields();
-    for (Field field : fields) {
-      if (!field.isAnnotationPresent(KeyOrder.class)) {
-        throw new MissingOrderException(
-            "There is at least one Field without order in the class annotated with KeyClass");
-      }
-    }
-    Arrays.sort(fields, Comparator.comparingInt(f -> f.getAnnotation(KeyOrder.class).value()));
+    Arrays.sort(
+        fields,
+        Comparator.comparingInt(
+            f -> {
+              KeyOrder o = f.getAnnotation(KeyOrder.class);
+              if (o == null)
+                throw new MissingOrderException(
+                    "There is at least one Field without a specified Order");
+              return o.value();
+            }));
     for (Field field : fields) {
       String name = field.getName();
       AttributeDescriptor attributeDescriptor = new AttributeDescriptor(pKeyDescriptor, name, null);

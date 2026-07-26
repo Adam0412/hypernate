@@ -40,8 +40,11 @@ public class EntityMetadataProvider {
     List<Field> fields = new ArrayList<>();
     List<AttributeMapper> mappers = new ArrayList<>();
     PrimaryKeyDescriptor pk = em.getPrimaryKeyDescriptor();
-    if (pk == null || pk.getAttributeDescriptors() == null || pk.getAttributeDescriptors().isEmpty()) {
-      throw new MissingKeysException("No primary key descriptors found for class: " + clazz.getName());
+    if (pk == null
+        || pk.getAttributeDescriptors() == null
+        || pk.getAttributeDescriptors().isEmpty()) {
+      throw new MissingKeysException(
+          "No primary key descriptors found for class: " + clazz.getName());
     }
     List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptors();
     for (AttributeDescriptor descriptor : pkAttributeDescriptors) {
@@ -59,7 +62,8 @@ public class EntityMetadataProvider {
       String mapperName = descriptor.getAttributeMapperDescriptor().getMapperName();
       try {
         Class<?> mapperClass = Class.forName(mapperName);
-        AttributeMapper mapper = (AttributeMapper) mapperClass.getDeclaredConstructor().newInstance();
+        AttributeMapper mapper =
+            (AttributeMapper) mapperClass.getDeclaredConstructor().newInstance();
         mappers.add(mapper);
       } catch (ReflectiveOperationException e) {
         logger.error("Failed to instantiate mapper: {}", mapperName, e);
@@ -103,11 +107,8 @@ public class EntityMetadataProvider {
   /**
    * Generates a lambda which builds a CompositeKey for a given class instance
    *
-   * <p>
-   * Using reflection we access the Field values which are given as primary keys,
-   * and with our
-   * mappers instances we map the values and with these we build the Composite
-   * Key.
+   * <p>Using reflection we access the Field values which are given as primary keys, and with our
+   * mappers instances we map the values and with these we build the Composite Key.
    *
    * @param clazz the class of the entity
    * @return a lambda that creates a CompositeKey for an object instance
@@ -122,8 +123,11 @@ public class EntityMetadataProvider {
     List<Field> fields = new ArrayList<>();
     List<AttributeMapper> mappers = new ArrayList<>();
     PrimaryKeyDescriptor pk = em.getPrimaryKeyDescriptor();
-    if (pk == null || pk.getAttributeDescriptors() == null || pk.getAttributeDescriptors().isEmpty()) {
-      throw new MissingKeysException("No primary key descriptors found for class: " + clazz.getName());
+    if (pk == null
+        || pk.getAttributeDescriptors() == null
+        || pk.getAttributeDescriptors().isEmpty()) {
+      throw new MissingKeysException(
+          "No primary key descriptors found for class: " + clazz.getName());
     }
     List<AttributeDescriptor> pkAttributeDescriptors = pk.getAttributeDescriptors();
     for (AttributeDescriptor descriptor : pkAttributeDescriptors) {
@@ -141,7 +145,8 @@ public class EntityMetadataProvider {
       String mapperName = descriptor.getAttributeMapperDescriptor().getMapperName();
       try {
         Class<?> mapperClass = Class.forName(mapperName);
-        AttributeMapper mapper = (AttributeMapper) mapperClass.getDeclaredConstructor().newInstance();
+        AttributeMapper mapper =
+            (AttributeMapper) mapperClass.getDeclaredConstructor().newInstance();
         mappers.add(mapper);
       } catch (ReflectiveOperationException e) {
         logger.error("Failed to instantiate mapper: {}", mapperName, e);
