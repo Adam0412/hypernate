@@ -82,10 +82,25 @@ public class EntityMetadataProvider {
     return stringKeyParts.toArray(String[]::new);
   }
 
+  /**
+   * Serializes the given entity into a JSON byte array using UTF-8 encoding.
+   *
+   * @param entity the entity object to serialize
+   * @param <T> the type of the entity
+   * @return a byte array representation of the serialized entity
+   */
   public <T> byte[] toBuffer(final T entity) {
     return toJson(entity).getBytes(StandardCharsets.UTF_8);
   }
 
+  /**
+   * Deserializes a JSON byte array into an entity object of the specified class.
+   *
+   * @param buffer the byte array containing the JSON data in UTF-8 encoding
+   * @param clazz the class of the entity to instantiate
+   * @param <T> the type of the entity
+   * @return the deserialized entity object
+   */
   public <T> T fromBuffer(final byte[] buffer, final Class<T> clazz) {
     final String json = new String(buffer, StandardCharsets.UTF_8);
     return JSON.deserialize(json, clazz);
@@ -95,6 +110,13 @@ public class EntityMetadataProvider {
     return JSON.serialize(entity);
   }
 
+  /**
+   * Retrieves or creates an {@link EntityKeyProvider} for the specified class. The provider is
+   * cached for subsequent use.
+   *
+   * @param clazz the class of the entity
+   * @return the key provider associated with the given class
+   */
   public EntityKeyProvider getKeyProviderForClass(Class<?> clazz) {
     if (!keyProviders.containsKey(clazz)) {
       EntityKeyProvider provider = createEntityKeyProvider(clazz);
@@ -171,14 +193,33 @@ public class EntityMetadataProvider {
     };
   }
 
+  /**
+   * Creates a base composite key for a given entity class based on its type name. This is typically
+   * used for partial key queries to retrieve all entities of a type.
+   *
+   * @param clazz the class of the entity
+   * @return a string representation of the composite key
+   */
   public String createCompositeKey(final Class<?> clazz) {
     return new CompositeKey(getType(clazz)).toString();
   }
 
+  /**
+   * Creates a complete composite key for a given entity class and its primary key parts.
+   *
+   * @param clazz the class of the entity
+   * @param keyParts the primary key parts (values) identifying a specific entity
+   * @return a string representation of the composite key
+   */
   public String createCompositeKey(Class<?> clazz, Object... keyParts) {
     return new CompositeKey(getType(clazz), mapKeyPartsToString(clazz, keyParts)).toString();
   }
 
+  /**
+   * Retrieves the inventory containing metadata for all registered entities.
+   *
+   * @return the {@link EntityMetadataInventory} instance
+   */
   public EntityMetadataInventory getMetaDataInventory() {
     return metaInventory;
   }
