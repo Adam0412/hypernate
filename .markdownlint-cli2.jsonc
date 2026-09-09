@@ -1,0 +1,41 @@
+// Configuration for markdownlint-cli2 (also read by the VS Code markdownlint
+// extension). Install the toolchain with `npm ci`, then lint locally with:
+// npx markdownlint-cli2
+{
+  "globs": ["**/*.md"],
+  "ignores": [".venv/**", "site/**", "**/node_modules/**"],
+  "customRules": [
+    "markdownlint-sentences-per-line",
+    "markdownlint-rule-search-replace"
+  ],
+  "config": {
+    // Only rules that guard the documented Markdown source conventions are
+    // enabled; see docs/contributing/documentation.md#markdown-conventions
+    "default": false,
+
+    // Nested list items must be indented consistently within a list
+    "MD005": true,
+
+    // Unordered lists nest by 2 spaces per level (the markdownlint default),
+    // matching CommonMark/GFM. The docs site renders this correctly via the
+    // mdx_truly_sane_lists override in mkdocs.yml; deeper indents would
+    // collapse into run-on text there. See docs/contributing/documentation.md
+    "MD007": true,
+
+    // One sentence per source line (semantic line breaks): shorter diffs,
+    // one changed line per changed sentence
+    "markdownlint-sentences-per-line": true,
+
+    // Use en-dashes, not em-dashes
+    "search-replace": {
+      "rules": [
+        {
+          "name": "no-em-dash",
+          "message": "Use an en-dash (–) surrounded by spaces instead of an em-dash",
+          "searchPattern": "/—/g",
+          "replace": "–"
+        }
+      ]
+    }
+  }
+}

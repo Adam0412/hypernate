@@ -1,0 +1,57 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+
+# Serialize deployments: concurrent `mike deploy --push` runs race on the
+# gh-pages ref. Do not cancel an in-progress run — interrupting a half-finished
+# gh-pages push is worse than queueing behind it.
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-latest:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up docs environment
+        uses: ./.github/actions/setup-docs
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Deploy latest
+        run: |
+          mike deploy --push --allow-empty --update-aliases latest
+          mike set-default --push latest
+
+  deploy-version:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up docs environment
+        uses: ./.github/actions/setup-docs
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Deploy version
+        run: |
+          mike deploy --push --allow-empty ${{ steps.version.outputs.VERSION }}

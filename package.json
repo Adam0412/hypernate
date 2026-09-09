@@ -1,0 +1,11 @@
+{
+  "name": "hypernate-docs-tooling",
+  "private": true,
+  "description": "Development tooling for linting the Markdown documentation sources",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "markdownlint-cli2": "0.23.2",
+    "markdownlint-rule-search-replace": "1.2.0",
+    "markdownlint-sentences-per-line": "0.1.4"
+  }
+}

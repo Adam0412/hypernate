@@ -1,0 +1,71 @@
+name: Build Documentation
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - '**.md'
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.markdownlint-cli2.jsonc'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/docs-build.yml'
+      - '.github/actions/setup-docs/**'
+  # No path filter for pull requests: a required status check that is filtered
+  # out never reports, leaving the PR blocked forever. Instead, a paths-filter
+  # step inside the job skips the build steps when no documentation files
+  # changed, so the check always reports (and trivially passes) on unrelated
+  # PRs.
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect documentation changes
+        id: changes
+        # dorny/paths-filter v4.0.3, pinned by commit SHA
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
+        with:
+          filters: |
+            docs:
+              - 'docs/**'
+              - 'mkdocs.yml'
+              - '.github/workflows/docs-build.yml'
+              - '.github/actions/setup-docs/**'
+            markdown:
+              - '**.md'
+              - '.markdownlint-cli2.jsonc'
+              - 'package.json'
+              - 'package-lock.json'
+
+      - name: Set up docs environment
+        if: steps.changes.outputs.docs == 'true'
+        uses: ./.github/actions/setup-docs
+
+      - name: Install lint toolchain
+        if: steps.changes.outputs.markdown == 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Lint Markdown
+        if: steps.changes.outputs.markdown == 'true'
+        run: npx markdownlint-cli2
+
+      - name: Build documentation
+        if: steps.changes.outputs.docs == 'true'
+        run: mkdocs build --strict

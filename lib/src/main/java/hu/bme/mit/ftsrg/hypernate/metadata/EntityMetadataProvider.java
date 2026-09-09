@@ -2,12 +2,16 @@
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
 import com.jcabi.aspects.Loggable;
+import hu.bme.mit.ftsrg.hypernate.annotations.EntityType;
 import hu.bme.mit.ftsrg.hypernate.mappers.AttributeMapper;
 import hu.bme.mit.ftsrg.hypernate.registry.MissingKeysException;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.hyperledger.fabric.shim.ledger.CompositeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +27,19 @@ public class EntityMetadataProvider {
   }
 
   <T> String getType(final Class<T> clazz) {
-    return clazz.getName().toUpperCase();
+    final EntityType annot = clazz.getAnnotation(EntityType.class);
+    if (annot == null) {
+      return clazz.getName();
+    }
+
+    final String value = annot.value();
+    if (value.isBlank()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "The @EntityType annotation on class %s has an empty or blank value",
+              clazz.getName()));
+    }
+    return value;
   }
 
   <T> String[] mapKeyPartsToString(final T entity, final Object... keyParts) {
