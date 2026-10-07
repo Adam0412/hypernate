@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.metadata;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyClass;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyOrder;
@@ -14,14 +14,13 @@ import hu.bme.mit.ftsrg.hypernate.registry.MissingKeysException;
 import hu.bme.mit.ftsrg.hypernate.registry.MissingOrderException;
 import io.github.classgraph.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
@@ -78,6 +77,43 @@ class EntityMetadataInventory {
    */
   public EntityDescriptor getForClass(final Class<?> clazz) {
     return data.get(clazz);
+  }
+
+  /**
+   * Collect the fields in a {@link KeyClass} and sort by their annotated order.
+   *
+   * @param keyClass the key class to collect from
+   * @return an integer-field mapping of the fields that indeed identify key parts
+   * @throws MissingOrderException if a field is encountered that has no {@link KeyOrder} annotation
+   * @throws ConflictingOrderException if multiple fields have {@link KeyOrder} annotations with the
+   *     same integer value
+   * @implNote package-private for testing
+   */
+  Map<Integer, Field> collectKeyFieldsByOrder(final Class<?> keyClass) {
+    final TreeMap<Integer, Field> fieldsByOrder = new TreeMap<>();
+    for (Field field : keyClass.getDeclaredFields()) {
+      // Synthetic and static fields are ignored
+      if (field.isSynthetic() || Modifier.isStatic(field.getModifiers())) {
+        continue;
+      }
+
+      // KeyOrder must be present
+      final KeyOrder order = field.getAnnotation(KeyOrder.class);
+      if (order == null) {
+        throw new MissingOrderException(
+            "Field %s of key class %s has no @KeyOrder; every key field needs one so that the composite key order is well defined"
+                .formatted(field.getName(), keyClass.getName()));
+      }
+
+      // Enforce unique order numbers
+      final Field previous = fieldsByOrder.putIfAbsent(order.value(), field);
+      if (previous != null) {
+        throw new ConflictingOrderException(
+            "Key class %s uses @KeyOrder(%d) on more than one field (%s and %s); the resulting key order would be arbitrary"
+                .formatted(keyClass.getName(), order.value(), previous.getName(), field.getName()));
+      }
+    }
+    return fieldsByOrder;
   }
 
   /**
@@ -204,46 +240,16 @@ class EntityMetadataInventory {
    *     annotation
    */
   private void generateMetadataFromKeyClass(final ClassInfo keyClassInfo) {
-    Class<?> keyClass = keyClassInfo.loadClass();
-    Class<?> pointedClass = keyClass.getAnnotation(KeyClass.class).value();
+    final Class<?> keyClass = keyClassInfo.loadClass();
+    final Class<?> pointedClass = keyClass.getAnnotation(KeyClass.class).value();
 
-    Supplier<Stream<Field>> keyFieldsSupp = () -> Arrays.stream(keyClass.getDeclaredFields());
-
-    keyFieldsSupp
-        .get()
-        .filter(f -> !f.isAnnotationPresent(KeyOrder.class))
-        .findFirst()
-        .ifPresent(
-            f -> {
-              throw new MissingOrderException(
-                  "Field %s of key class %s has no @KeyOrder; every key field needs one so that the composite key order is well defined"
-                      .formatted(f.getName(), keyClass.getName()));
-            });
-
-    final Map<Integer, List<String>> fieldsByOrder =
-        keyFieldsSupp
-            .get()
-            .collect(
-                groupingBy(
-                    f -> f.getAnnotation(KeyOrder.class).value(),
-                    mapping(Field::getName, toList())));
-    fieldsByOrder.entrySet().stream()
-        .filter(e -> e.getValue().size() > 1)
-        .findFirst()
-        .ifPresent(
-            e -> {
-              throw new ConflictingOrderException(
-                  "Key class %s uses @KeyOrder(%d) on more than one field (%s); the resulting key order would be arbitrary"
-                      .formatted(keyClass.getName(), e.getKey(), String.join(", ", e.getValue())));
-            });
+    final Map<Integer, Field> fieldsByOrder = collectKeyFieldsByOrder(keyClass);
 
     // The key class's own fields are only a source of names, order and mapper choice; the fields
     // the key is actually built from live on the entity.
     final String declaredBy = "key class " + keyClass.getName();
     final List<AttributeDescriptor> attributes =
-        keyFieldsSupp
-            .get()
-            .sorted(Comparator.comparingInt(f -> f.getAnnotation(KeyOrder.class).value()))
+        fieldsByOrder.values().stream()
             .map(
                 field ->
                     new AttributeDescriptor(
