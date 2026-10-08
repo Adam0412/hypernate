@@ -32,6 +32,7 @@ class EntityMetadataInventory {
   private final Logger logger = LoggerFactory.getLogger(EntityMetadataInventory.class);
 
   private final Map<Class<?>, EntityDescriptor> data = new ConcurrentHashMap<>();
+  private final Map<Class<?>, ConflictingMetadataException> conflicts = new ConcurrentHashMap<>();
 
   /*
    * Initializes the metadata registry by scanning the classpath for annotated classes. Searches for
@@ -74,8 +75,15 @@ class EntityMetadataInventory {
    *
    * @param clazz the class whose entity descriptor is needed
    * @return the cached entity descriptor or <code>null</code> if it could not be found
+   * @throws ConflictingMetadataException if multiple metadata descriptors were detected for the
+   *     class
    */
   public EntityDescriptor getForClass(final Class<?> clazz) {
+    final ConflictingMetadataException conflict = conflicts.get(clazz);
+    if (conflict != null) {
+      throw conflict;
+    }
+
     return data.get(clazz);
   }
 
@@ -117,6 +125,46 @@ class EntityMetadataInventory {
   }
 
   /**
+   * Registers an entity descriptor, or records a conflict if the entity already has one.
+   *
+   * <p>A conflict (more than one source of metadata for the same entity; eg, two {@link KeyClass}es
+   * or a {@link KeyClass} pointing at an entity that also carries {@link PrimaryKey}) is recorded
+   * rather than thrown: the entity gets no descriptor and {@link #getForClass(Class)} throws the
+   * recorded exception for it.
+   *
+   * @param meta the descriptor to register
+   * @implNote package-private for testing
+   */
+  void add(final EntityDescriptor meta) {
+    final Class<?> clazz = meta.clazz();
+    final String name = clazz.getName();
+
+    final ConflictingMetadataException earlier = conflicts.get(clazz);
+    if (earlier != null) {
+      final var extra =
+          new ConflictingMetadataException(
+              "Yet another source of primary key metadata for entity %s (%s)"
+                  .formatted(name, describeAttributes(meta)));
+      earlier.addSuppressed(extra);
+      logger.error("Entity {} has yet another source of primary key metadata", name, extra);
+      return;
+    }
+
+    final EntityDescriptor existing = data.remove(clazz);
+    if (existing != null) {
+      final var e =
+          new ConflictingMetadataException(
+              "Entity %s has conflicting primary key metadata (%s vs %s); refusing to choose between them. Check for a duplicate @KeyClass or a @PrimaryKey that a @KeyClass also points at."
+                  .formatted(name, describeAttributes(existing), describeAttributes(meta)));
+      conflicts.put(clazz, e);
+      logger.error("Entity {} will be unusable due to conflicting primary key metadata", name, e);
+      return;
+    }
+
+    data.put(clazz, meta);
+  }
+
+  /**
    * Runs one class's metadata generation, containing any failure to that class.
    *
    * <p>This runs from a static initializer, so an escaping exception would become an {@link
@@ -136,26 +184,6 @@ class EntityMetadataInventory {
           "Failed to build entity metadata for {} -- skipping it; using this entity will fail",
           classInfo.getName(),
           e);
-    }
-  }
-
-  /**
-   * Registers an entity descriptor, rejecting a second one for the same entity.
-   *
-   * <p>Two {@link KeyClass}es aimed at the same entity, or an entity carrying {@link PrimaryKey}
-   * that a key class also points at, would otherwise silently resolve to whichever the classpath
-   * scan happened to reach last.
-   *
-   * @param meta the descriptor to register
-   * @throws ConflictingMetadataException if this entity already has a descriptor
-   */
-  private void add(final EntityDescriptor meta) {
-    final EntityDescriptor existing = data.putIfAbsent(meta.clazz(), meta);
-    if (existing != null) {
-      throw new ConflictingMetadataException(
-          "Entity %s already has primary key metadata (%s); refusing to replace it with (%s). Check for a duplicate @KeyClass or a @PrimaryKey that a @KeyClass also points at."
-              .formatted(
-                  meta.clazz().getName(), describeAttributes(existing), describeAttributes(meta)));
     }
   }
 

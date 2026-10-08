@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyClass;
 import hu.bme.mit.ftsrg.hypernate.annotations.KeyOrder;
 import hu.bme.mit.ftsrg.hypernate.mappers.ObjectToString;
+import hu.bme.mit.ftsrg.hypernate.registry.ConflictingMetadataException;
 import hu.bme.mit.ftsrg.hypernate.registry.ConflictingOrderException;
 import hu.bme.mit.ftsrg.hypernate.registry.MissingOrderException;
 import java.lang.reflect.Field;
@@ -155,6 +156,83 @@ class EntityMetadataInventoryTest {
     private record WarehouseKey(@KeyOrder(2) int localId, @KeyOrder(1) String locationCode) {
 
       static final String NOT_A_KEY_FIELD = "ignored";
+    }
+  }
+
+  /*
+   * The inventory is global and cannot be reset, so every test registers its own entity class.
+   * Conflicts are logged at ERROR level; that log output is expected here.
+   */
+  @Nested
+  class Adding_descriptors {
+
+    @Test
+    void given_single_descriptor_then_returns_it() {
+      final EntityDescriptor descriptor = descriptor(Single.class, "id");
+
+      EntityMetadataInventory.add(descriptor);
+
+      assertSame(descriptor, EntityMetadataInventory.getForClass(Single.class));
+    }
+
+    @Test
+    void given_two_descriptors_for_same_entity_then_lookup_throws_conflicting_metadata_exception() {
+      EntityMetadataInventory.add(descriptor(Doubled.class, "id"));
+      EntityMetadataInventory.add(descriptor(Doubled.class, "other"));
+
+      final ConflictingMetadataException e =
+          assertThrows(
+              ConflictingMetadataException.class,
+              () -> EntityMetadataInventory.getForClass(Doubled.class));
+
+      assertTrue(e.getMessage().contains(Doubled.class.getName()), e.getMessage());
+      assertTrue(e.getMessage().contains("(id vs other)"), e.getMessage());
+    }
+
+    @Test
+    void given_three_descriptors_for_same_entity_then_lookup_still_throws_and_reports_third() {
+      EntityMetadataInventory.add(descriptor(Tripled.class, "id"));
+      EntityMetadataInventory.add(descriptor(Tripled.class, "other"));
+      EntityMetadataInventory.add(descriptor(Tripled.class, "third"));
+
+      final ConflictingMetadataException e =
+          assertThrows(
+              ConflictingMetadataException.class,
+              () -> EntityMetadataInventory.getForClass(Tripled.class));
+
+      assertEquals(1, e.getSuppressed().length);
+      assertTrue(
+          e.getSuppressed()[0].getMessage().contains("third"), e.getSuppressed()[0].getMessage());
+    }
+
+    private EntityDescriptor descriptor(final Class<?> entityClass, final String fieldName) {
+      final Field field;
+      try {
+        field = entityClass.getDeclaredField(fieldName);
+      } catch (NoSuchFieldException e) {
+        throw new AssertionError("Test entity %s lacks field %s".formatted(entityClass, fieldName));
+      }
+      return new EntityDescriptor(
+          entityClass,
+          new PrimaryKeyDescriptor(List.of(new AttributeDescriptor(field, ObjectToString.class))));
+    }
+
+    private static class Single {
+
+      String id;
+    }
+
+    private static class Doubled {
+
+      String id;
+      String other;
+    }
+
+    private static class Tripled {
+
+      String id;
+      String other;
+      String third;
     }
   }
 }
