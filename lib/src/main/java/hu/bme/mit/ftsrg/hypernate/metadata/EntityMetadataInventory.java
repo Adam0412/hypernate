@@ -41,12 +41,7 @@ class EntityMetadataInventory {
    * metadata inventory.
    */
   static {
-    var classGraph =
-        new ClassGraph()
-            .enableClassInfo()
-            .enableExternalClasses()
-            .ignoreClassVisibility()
-            .enableAnnotationInfo();
+    var classGraph = new ClassGraph().enableAnnotationInfo().ignoreClassVisibility();
     try (ScanResult result = classGraph.scan()) {
       // Process entity classes explicitly annotated with PrimaryKey
       ClassInfoList primaryKeyedClasses = result.getClassesWithAnnotation(PrimaryKey.class);
@@ -163,6 +158,12 @@ class EntityMetadataInventory {
 
     data.put(clazz, meta);
   }
+
+  /**
+   * Dummy method to call in order to trigger an execution of the static initializer block and the
+   * classpath scan.
+   */
+  void ensureScanned() {}
 
   /**
    * Runs one class's metadata generation, containing any failure to that class.

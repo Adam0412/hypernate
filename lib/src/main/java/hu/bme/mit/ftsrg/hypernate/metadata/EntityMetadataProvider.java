@@ -41,6 +41,16 @@ public class EntityMetadataProvider {
   private final Map<Class<?>, EntityKeyProvider> keyProviderForClass = new ConcurrentHashMap<>();
 
   /**
+   * Eagerly build the metadata inventory instead of on first ke lookup.
+   *
+   * @return always null
+   */
+  public static Void preload() {
+    EntityMetadataInventory.ensureScanned();
+    return null;
+  }
+
+  /**
    * Retrieves or creates an {@link EntityKeyProvider} for the specified class of an entity. The
    * provider is cached for subsequent use.
    *
