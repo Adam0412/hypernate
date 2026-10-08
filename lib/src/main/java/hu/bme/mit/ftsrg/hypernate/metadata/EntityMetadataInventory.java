@@ -167,11 +167,11 @@ class EntityMetadataInventory {
   /**
    * Runs one class's metadata generation, containing any failure to that class.
    *
-   * <p>This runs from a static initializer, so an escaping exception would become an {@link
-   * ExceptionInInitializerError} and leave this class permanently unusable for the rest of the
-   * JVM's life -- one malformed entity anywhere on the classpath would take down every other one.
-   * Instead, the bad class is skipped and reported; looking it up later fails with the usual
-   * "metadata not found" error.
+   * <p>This runs from a static initializer, so an escaping exception or linkage error (eg, field
+   * type missing at runtime) would become an {@link ExceptionInInitializerError} and leave this
+   * class permanently unusable for the rest of the JVM's life -- one malformed entity anywhere on
+   * the classpath would take down every other one. Instead, the bad class is skipped and reported;
+   * looking it up later fails with the usual "metadata not found" error.
    *
    * @param classInfo the class being processed
    * @param generator the generation step to run for it
@@ -179,7 +179,7 @@ class EntityMetadataInventory {
   private void register(final ClassInfo classInfo, final Consumer<ClassInfo> generator) {
     try {
       generator.accept(classInfo);
-    } catch (RuntimeException e) {
+    } catch (RuntimeException | LinkageError e) {
       logger.error(
           "Failed to build entity metadata for {} -- skipping it; using this entity will fail",
           classInfo.getName(),
