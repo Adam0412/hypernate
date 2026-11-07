@@ -18,6 +18,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -27,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @UtilityClass
-class EntityMetadataInventory {
+public class EntityMetadataInventory {
 
   private final Logger logger = LoggerFactory.getLogger(EntityMetadataInventory.class);
 
@@ -80,6 +81,10 @@ class EntityMetadataInventory {
     }
 
     return data.get(clazz);
+  }
+
+  public Set<Class<?>> getEntityList(){
+    return data.keySet();
   }
 
   /**
