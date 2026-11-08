@@ -83,7 +83,7 @@ public class EntityMetadataInventory {
     return data.get(clazz);
   }
 
-  public Set<Class<?>> getEntityList(){
+  public Set<Class<?>> getEntityList() {
     return data.keySet();
   }
 
