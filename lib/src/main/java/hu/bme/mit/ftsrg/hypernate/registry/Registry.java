@@ -1,13 +1,18 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.registry;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcabi.aspects.Loggable;
+import hu.bme.mit.ftsrg.hypernate.annotations.SchemaVersion;
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import hu.bme.mit.ftsrg.hypernate.metadata.EntityKeyProvider;
 import hu.bme.mit.ftsrg.hypernate.metadata.EntityMetadataProvider;
+import hu.bme.mit.ftsrg.hypernate.schemaregistry.SchemaDowngradeException;
 import hu.bme.mit.ftsrg.hypernate.schemaregistry.SchemaRegistry;
 import hu.bme.mit.ftsrg.hypernate.serialization.EntitySerializer;
 import hu.bme.mit.ftsrg.hypernate.serialization.HypernateEntitySerializer;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +44,8 @@ public class Registry {
   private final EntitySerializer serializer;
 
   private final SchemaRegistry schemaRegistry;
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public Registry(final HypernateContext ctx, final SchemaRegistry schemaRegistry) {
     this(ctx, ctx.getStub(), schemaRegistry, METADATA_PROVIDER);
@@ -109,7 +116,11 @@ public class Registry {
    * @throws EntityNotFoundException if the entity does not yet exist on the ledger
    */
   public <T> void mustUpdate(final T entity) throws EntityNotFoundException {
-    assertExists(entity);
+    try {
+      assertDowngrade(entity);
+    } catch (IOException e) {
+      logger.info(e.getMessage());
+    }
 
     final String key = getCompositeKey(entity);
     final byte[] buffer = serializer.toBuffer(entity);
@@ -128,6 +139,9 @@ public class Registry {
       mustUpdate(entity);
     } catch (EntityNotFoundException e) {
       logger.info("{} does not exist -- ignoring update", entity);
+      return false;
+    } catch (SchemaDowngradeException e) {
+      logger.warn("{} update rejected due to schema downgrade", entity);
       return false;
     }
 
@@ -264,5 +278,23 @@ public class Registry {
   private <T> String getCompositeKey(final T ent) {
     EntityKeyProvider keyProvider = metadataProvider.keyProviderFor(ent);
     return keyProvider.getKey(ent);
+  }
+
+  @Loggable(Loggable.DEBUG)
+  private <T> void assertDowngrade(final T ent) throws EntityNotFoundException, IOException {
+    final String key = getCompositeKey(ent);
+    byte[] data = stub.getState(key);
+    if (data == null || data.length == 0) {
+      throw new EntityNotFoundException(key);
+    }
+    JsonNode dataNode = OBJECT_MAPPER.readTree(data);
+    int version = dataNode.at("/hypernate/version").asInt();
+    int schemaVersion =
+        ent.getClass().getAnnotation(SchemaVersion.class) != null
+            ? ent.getClass().getAnnotation(SchemaVersion.class).value()
+            : 1;
+    if (version > schemaVersion) {
+      throw new SchemaDowngradeException(ent.getClass().getName());
+    }
   }
 }
